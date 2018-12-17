@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
-import Person from '../components/Persons/Person/Person';
+import Persons from '../components/Persons/Persons';
+import Cockpit from '../components/Cockpit/Cockpit';
 
 class App extends Component {
   state = {
@@ -8,7 +9,8 @@ class App extends Component {
       { id: 0, nombre: 'Seba', edad: 27 },
       { id: 1, nombre: 'Magda', edad: 26 }
     ],
-    showPersons: false
+    showPersons: false,
+    toggleClicked: 0
   } 
   
   deletePersonHandler = (personIndex) => {
@@ -49,52 +51,31 @@ class App extends Component {
 
   togglePersonsHandler = () => {
     const doesShow = this.state.showPersons;
-    this.setState({showPersons: !doesShow})
+    // Si el estado actual depende del estado anterior, se debe usar prevState en una
+    // función anónima, para que no haya problemas de paralelismo
+    this.setState( (prevState, props) => {
+      return {
+        showPersons: !doesShow,
+        toggleClicked: prevState.toggleClicked + 1
+      }
+    })
   }
 
   render() {
-
     let persons = null;
-    // esto genera un array que dice "red bold"
-    //let classes = ['red', 'bold'].join(' ');
-    const classes = [];
-    if(this.state.persons.length <= 1) {
-      classes.push('red'); // classes = ['red']
-    }
-    if(this.state.persons.length <= 0) {
-      classes.push('bold'); // classes = ['red', 'bold']
-    }
 
     if(this.state.showPersons) {
-      persons = (
-        <div>
-          {
-            this.state.persons.map((person, index) => {
-              return <Person 
-                  // React compara el presente con el futuro y renderea sólo lo que ha cambiado
-                  // para eso, necesita una key única (index no sirve porque cambia cada vez que
-                  // se renderea de nuevo la lista)
-                  key = {person.id}
-                  click = {() => this.deletePersonHandler(index)}
-                  nombre = {person.nombre} 
-                  edad = {person.edad }
-                  // la función anónima es la que se ejecuta con el evento onChange, así que
-                  // ella es la que recibe el objeto event, y luego se le pasa al handler
-                  changed = {(event) => this.nameChangedHandler(event, person.id)}
-                />
-            })
-          }
-        </div>
-      );
+      persons = 
+        <Persons 
+          persons = {this.state.persons}
+          clicked = {this.deletePersonHandler}
+          changed = {this.nameChangedHandler}
+        />;
     }
 
     return (
       <div className="App">
-        {/* Así le paso la referencia a una función para que la ejecute al hacer click:
-          <button onClick={this.switchNameHandler}>Cambiar nombre</button>*/}
-        <button 
-          className = {classes.join(' ')}
-          onClick = {this.togglePersonsHandler}>Mostrar nombres</button>
+        <Cockpit persons = {this.state.persons} clicked = {this.togglePersonsHandler} showPersons = {this.state.showPersons} />
         {persons}
       </div>
     );
