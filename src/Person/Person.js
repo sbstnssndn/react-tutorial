@@ -11,8 +11,10 @@ const Person = (props) => {
                 a la función que maneja el estado de Person */}
             <h2 onClick={props.click}>Hola, soy {props.nombre} y tengo {props.edad} años</h2>
             <p>{props.children}</p>
-            {/* onChange se ejecuta cuando el valor en este input cambia. Es un evento. */}
-            <input type="text" onChange={props.changed} />
+            {/* onChange se ejecuta cuando el valor en este input cambia. Es un evento. 
+                value rescata el nombre en el estado actual del input, que es pasado
+                desde App*/}
+            <input type="text" onChange={props.changed} value={props.nombre} />
         </div>
     );
 };

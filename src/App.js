@@ -41,6 +41,12 @@ class App extends Component {
         <Person
           nombre={this.state.persons[0].nombre}
           edad={this.state.persons[0].edad}
+          /* bind crea una nueva función para this.switchNameHandler que está ligadada a
+            la función original, y tiene su mismo cuerpo. El objeto "this" de la nueva
+            función se asocia al objeto especificado, y tiene los mismos parámetros iniciales.
+            RESULTADO: Esta nueva función bindea su "this" al "this" de la función de arriba,
+            haciendo que este nuevo "this" controle el de la función original. Le estoy pasando
+            una lista de argumentos a la función, por eso le paso nuevoNombre como 'Sebalino'. */
           click={this.switchNameHandler.bind(this, 'Sebalino')}
           changed={this.nameChangedHandler}
         >
