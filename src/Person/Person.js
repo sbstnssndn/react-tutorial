@@ -14,7 +14,7 @@ const Person = (props) => {
             {/* onChange se ejecuta cuando el valor en este input cambia. Es un evento. 
                 value rescata el nombre en el estado actual del input, que es pasado
                 desde App*/}
-            <input type="text" onChange={props.changed} value={props.nombre} />
+            <input type="text" value={props.nombre} onChange={props.changed} />
         </div>
     );
 };

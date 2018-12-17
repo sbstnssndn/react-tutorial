@@ -5,53 +5,97 @@ import Person from './Person/Person';
 class App extends Component {
   state = {
     persons: [
-      { nombre: 'Seba', edad: 27 },
-      { nombre: 'Magda', edad: 26 }
-    ]
-  }
-
-  switchNameHandler = (nuevoNombre) => {
-    this.setState({
-      persons: [
-        { nombre: nuevoNombre, edad: 27 }
-      ]
-    })
+      { id: 0, nombre: 'Seba', edad: 27 },
+      { id: 1, nombre: 'Magda', edad: 26 }
+    ],
+    showPersons: false
+  } 
+  
+  deletePersonHandler = (personIndex) => {
+    // Si hago const persons = this.state.persons; estoy referenciando el objeto persons original,
+    // y esto está mal, porque estaría editando el estado a mano en vez de usar setState. Para evitar
+    // eso, creo una copia del estado original usando slice(). Otra opción es usar el spread operator
+    // para crear un nuevo array sólo con los elementos del estado original
+    // OPCIÓN 1: const persons = this.state.persons.slice();
+    // OPCIÓN 2:
+    const persons = [...this.state.persons];
+    // recordar que los arrays se pasan por referencia, así que no estoy editando una constante,
+    // sino que estoy cambiando el puntero
+    persons.splice(personIndex, 1);
+    this.setState({persons: persons});
   }
 
   // el objeto evento es pasado automáticamente por react/js
-  nameChangedHandler = (event) => {
-    this.setState( {
-      persons: [
-        // El target de este event es el input (campo de texto) en que escribimos, y obtenemos el valor de dicho input
-        { nombre: event.target.value, edad: 27 },
-        { nombre: 'Magda', edad: 26 }
-      ]
-    } )
+  nameChangedHandler = (event, id) => {
+    // ejecuta findIndex en cada elemento del arry. Verifica si el id de esa persona
+    // es igual al id que estoy buscando. La función p devuelve true/false. Si es true,
+    // findIndex devuelve el id de la persona que estoy buscando.
+    const personIndex = this.state.persons.findIndex(p => {
+      return p.id === id;
+    });
+
+    // copio el estado actual de la persona que encontré
+    const person = { ...this.state.persons[personIndex] };
+    // hago que el nombre que se ingrese en el input sea el de la persona que encontré
+    // es como un nuevaPersona.setName(nombreEnElForm)
+    person.nombre = event.target.value;
+    // copio el array de personas y sobreescribo la persona que encontré con
+    // la nueva persona, con el nombre cambiado según el input
+    const persons = [...this.state.persons];
+    persons[personIndex] = person;
+    // actualizo el estado haciendo algo como persons: newPersons
+    this.setState( {persons: persons} );
+  }
+
+  togglePersonsHandler = () => {
+    const doesShow = this.state.showPersons;
+    this.setState({showPersons: !doesShow})
   }
 
   render() {
+
+    let persons = null;
+    // esto genera un array que dice "red bold"
+    //let classes = ['red', 'bold'].join(' ');
+    const classes = [];
+    if(this.state.persons.length <= 1) {
+      classes.push('red'); // classes = ['red']
+    }
+    if(this.state.persons.length <= 0) {
+      classes.push('bold'); // classes = ['red', 'bold']
+    }
+
+    if(this.state.showPersons) {
+      persons = (
+        <div>
+          {
+            this.state.persons.map((person, index) => {
+              return <Person 
+                  // React compara el presente con el futuro y renderea sólo lo que ha cambiado
+                  // para eso, necesita una key única (index no sirve porque cambia cada vez que
+                  // se renderea de nuevo la lista)
+                  key = {person.id}
+                  click = {() => this.deletePersonHandler(index)}
+                  nombre = {person.nombre} 
+                  edad = {person.edad }
+                  // la función anónima es la que se ejecuta con el evento onChange, así que
+                  // ella es la que recibe el objeto event, y luego se le pasa al handler
+                  changed = {(event) => this.nameChangedHandler(event, person.id)}
+                />
+            })
+          }
+        </div>
+      );
+    }
+
     return (
       <div className="App">
         {/* Así le paso la referencia a una función para que la ejecute al hacer click:
           <button onClick={this.switchNameHandler}>Cambiar nombre</button>*/}
-        {/* Para pasarle un argumento a una función, al botón le paso una función anónima
-            que se va a ejecutar al hacerle click a ese botón, y que a su vez, va a ejecutar
-            la función switchNameHandler con los parámetros ingresados */}
-        <button onClick={() => this.switchNameHandler('Sebita')}>Cambiar nombre</button>
-        <Person
-          nombre={this.state.persons[0].nombre}
-          edad={this.state.persons[0].edad}
-          /* bind crea una nueva función para this.switchNameHandler que está ligadada a
-            la función original, y tiene su mismo cuerpo. El objeto "this" de la nueva
-            función se asocia al objeto especificado, y tiene los mismos parámetros iniciales.
-            RESULTADO: Esta nueva función bindea su "this" al "this" de la función de arriba,
-            haciendo que este nuevo "this" controle el de la función original. Le estoy pasando
-            una lista de argumentos a la función, por eso le paso nuevoNombre como 'Sebalino'. */
-          click={this.switchNameHandler.bind(this, 'Sebalino')}
-          changed={this.nameChangedHandler}
-        >
-        Este es un props.children
-        </Person>
+        <button 
+          className = {classes.join(' ')}
+          onClick = {this.togglePersonsHandler}>Mostrar nombres</button>
+        {persons}
       </div>
     );
   }
